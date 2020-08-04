@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { imageFirestore, imageStorage } from '../config/firebase';
+import { imageFirestore, imageStorage, timestamp } from '../config/firebase';
 
 export const useStorage = (file) => {
   const [progress, setProgress] = useState(0);
@@ -8,6 +8,7 @@ export const useStorage = (file) => {
 
   useEffect(() => {
     const storage = imageStorage.ref(file.name);
+    const collection = imageFirestore.collection('images');
 
     storage.put(file).on(
       'state_changed',
@@ -18,10 +19,33 @@ export const useStorage = (file) => {
         setError(err);
       },
       async () => {
-        setUrl(storage.getDownloadURL());
+        const url = await storage.getDownloadURL();
+        const timeStamp = timestamp();
+
+        await collection.add({ url, timeStamp });
+
+        setUrl(url);
       }
     );
   }, [file]);
 
   return { progress, error, url };
+};
+
+export const useFirestore = (collection) => {
+  const [docs, setDocs] = useState([]);
+
+  useEffect(() => {
+    const unsub = imageFirestore.collection(collection).onSnapshot((snap) => {
+      let documents = [];
+      snap.forEach((doc) => {
+        documents.push({ ...doc.data(), id: doc.id });
+      });
+      setDocs(documents);
+    });
+
+    return () => unsub();
+  }, [collection]);
+
+  return { docs };
 };

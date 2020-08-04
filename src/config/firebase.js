@@ -3,7 +3,7 @@ import 'firebase/storage';
 import 'firebase/firestore';
 
 let firebaseConfig = {
-  apiKey: 'AIzaSyCiujDFmA6sDwHETI0BmMpL1VCXKGfZ-cw',
+  apiKey: process.env.REACT_APP_API_KEY,
   authDomain: 'caramel-banner-234907.firebaseapp.com',
   databaseURL: 'https://caramel-banner-234907.firebaseio.com',
   projectId: 'caramel-banner-234907',
@@ -16,3 +16,4 @@ firebase.initializeApp(firebaseConfig);
 
 export const imageStorage = firebase.storage();
 export const imageFirestore = firebase.firestore();
+export const timestamp = firebase.firestore.FieldValue.serverTimestamp;
